@@ -1,0 +1,50 @@
+---
+- name: Chargement des variables
+  ansible.builtin.include_vars:
+    file: ./vars_database.yml
+
+- name: Installer prérequis "{{ item }}"
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: true
+  loop: "{{ database_prerequis }}"
+
+- name: Installer "{{ database_server }}"
+  ansible.builtin.apt:
+    name: "{{ database_server }}"
+    state: present
+    update_cache: true
+
+- name: Démarrer le service "{{ database_server }}"
+  ansible.builtin.systemd:
+    name: "{{ database_binaire }}"
+    state: started
+    enabled: true
+
+- name: Créer la base de données {{ application_name }}
+  community.mysql.mysql_db:
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    name: "{{ database_application_db_name }}"
+    state: present
+
+- name: Créer l'utilisateur de la base de données "{{ database_application_db_name }}"
+  community.mysql.mysql_user:
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    name: "{{ database_application_db_user }}"
+    password: "{{ database_application_db_user_password }}"
+    priv: '*.*:ALL'
+    host: '%'
+    state: present
+
+- name: Modifier l'adresse d'ecoute du serveur
+  lineinfile:
+    path: /etc/mysql/mysql.conf.d/mysqld.cnf
+    regexp: '^bind-address'
+    line: 'bind-address = 0.0.0.0'
+
+- name: Démarrer le service "{{ database_server }}"
+  ansible.builtin.systemd:
+    name: "{{ database_binaire }}"
+    state: restarted
+    enabled: true

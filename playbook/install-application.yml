@@ -1,0 +1,30 @@
+---
+- name: Chargement des variables
+  ansible.builtin.include_vars:
+    file: ../vars/vars_application.yml
+
+- name: Téléchargement du paquet
+  ansible.builtin.get_url:
+    url: https://downloads.apache.org/{{ application_name }}/{{ application_version }}/source/{{ application_name }}-server-{{ application_version }}.tar.gz
+    dest: /tmp/{{ application_name }}-server-{{ application_version }}.tar.gz
+    mode: '0644'
+
+- name: Extraire le paquet de l'archive
+  ansible.builtin.unarchive:
+    src: /tmp/{{ application_name }}-server-{{ application_version }}.tar.gz
+    dest: /tmp/
+    remote_src: true
+
+- name: Compiler et installer le paquet
+  ansible.builtin.shell:
+    cmd: ./configure --with-systemd-dir=/etc/systemd/system/ && make && make install && ldconfig
+    chdir: /tmp/{{ application_name }}-server-{{ application_version }}
+    creates: "/usr/local/sbin/{{ application_binaire }}"
+  environment:
+    CFLAGS: "-Wno-error"
+
+- name: Activer et démarrer le service
+  ansible.builtin.systemd:
+    name: "{{ application_binaire }}"
+    enabled: true
+    state: started

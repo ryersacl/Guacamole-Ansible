@@ -1,0 +1,55 @@
+---
+- name: Chargement des variables
+  ansible.builtin.include_vars:
+    file: ./vars_database.yml
+
+- name: Chargement des variables
+  ansible.builtin.include_vars:
+    file: ../vars/vars_application.yml
+
+- name: Récupérer l'adresse IP du serveur de base de données
+  ansible.builtin.set_fact:
+    db_ip: "{{ hostvars['db1']['ansible_default_ipv4']['address'] }}"
+
+- name: Modifier le fichier {{ application_name }}.properties pour inclure l'adresse IP de la base de données
+  ansible.builtin.lineinfile:
+    path: /etc/{{ application_name }}/{{ application_name }}.properties
+    regexp: '^mysql-hostname'
+    line: "mysql-hostname: {{ db_ip }}"
+    create: true
+    state: present
+
+- name: Modifier le fichier {{ application_name }}.properties pour définir les autres paramètres de la base de données
+  ansible.builtin.lineinfile:
+    path: /etc/{{ application_name }}/{{ application_name }}.properties
+    regexp: '^mysql-database'
+    line: 'mysql-database: {{ database_application_db_name }}'
+    create: true
+    state: present
+
+- name: Modifier le fichier {{ application_name }}.properties pour définir le nom d'utilisateur et mot de passe
+  ansible.builtin.lineinfile:
+    path: /etc/{{ application_name }}/{{ application_name }}.properties
+    regexp: '^mysql-username'
+    line: 'mysql-username: {{ database_application_db_user }}'
+    create: true
+    state: present
+
+- name: Modifier le fichier {{ application_name }}.properties pour définir le mot de passe de la base de données
+  ansible.builtin.lineinfile:
+    path: /etc/{{ application_name }}/{{ application_name }}.properties
+    regexp: '^mysql-password'
+    line: 'mysql-password: {{ database_application_db_user_password }}'
+    create: true
+    state: present
+
+- name: Modifier le fichier pour déclarer le serveur {{ application_name }}
+  ansible.builtin.blockinfile:
+    path: /etc/{{ application_name }}/{{ application_binaire }}.conf
+    block: |
+      [server]
+      bind_host = 0.0.0.0
+      bind_port = 4822
+    create: true
+    state: present
+

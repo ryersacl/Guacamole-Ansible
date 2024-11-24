@@ -1,0 +1,5 @@
+---
+application_name: guacamole
+application_version: 1.5.5
+application_binaire: guacd
+totp_issuer: rdl-totp-issuer

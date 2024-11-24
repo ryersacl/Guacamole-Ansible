@@ -1,0 +1,40 @@
+---
+- name: Chargement des variables
+  ansible.builtin.include_vars:
+    file: ./vars_database.yml
+
+- name: Chargement des variables
+  ansible.builtin.include_vars:
+    file: ../vars/vars_application.yml
+
+- name: Telecharger l'extension TOTP de {{ application_name }}
+  ansible.builtin.get_url:
+    url: https://downloads.apache.org/{{ application_name }}/{{ application_version }}/binary/{{ application_name }}-auth-totp-{{ application_version }}.tar.gz
+    dest: /tmp/{{ application_name }}-auth-totp-{{ application_version }}.tar.gz
+    mode: '0644'
+
+- name: Extraire l'archive de l'extension TOTP
+  ansible.builtin.unarchive:
+    src: /tmp/{{ application_name }}-auth-totp-{{ application_version }}.tar.gz
+    dest: /tmp/{{ application_name }}
+    remote_src: true
+
+- name: Déplacer l'extension dans le répertoire de configuration
+  ansible.builtin.copy:
+    src: /tmp/{{ application_name }}/{{ application_name }}-auth-totp-{{ application_version }}/{{ application_name }}-auth-totp-{{ application_version }}.jar
+    dest: /etc/{{ application_name }}/extensions/{{ application_name }}-auth-totp-{{ application_version }}.jar
+    remote_src: true
+    mode: '0644'
+
+- name: Ajouter les paramètres TOTP à guacamole.properties
+  ansible.builtin.blockinfile:
+    path: /etc/{{ application_name }}/{{ application_name }}.properties
+    marker: "# BEGIN TOTP BLOCK"
+    block: |
+      # TOTP
+      totp-issuer: "{{ totp_issuer }}"
+      totp-digits: 6
+      totp-period: 30
+      totp-mode: sha1
+    create: true
+    state: present

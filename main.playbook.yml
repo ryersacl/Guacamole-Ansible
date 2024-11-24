@@ -1,0 +1,44 @@
+---
+- name: Deployer une stack lamp guacamole
+  hosts: all
+  become: true
+  tasks:
+
+    - name: Installer prérequis
+      ansible.builtin.import_tasks: ./playbook/install-prerequis.yml
+      when: "'webserver' in group_names"
+
+    - name: Installer application
+      ansible.builtin.import_tasks: ./playbook/install-application.yml
+      when: "'webserver' in group_names"
+
+    - name: Installer middleware
+      ansible.builtin.import_tasks: ./playbook/install-middleware.yml
+      when: "'webserver' in group_names"
+
+    - name: Configurer application
+      ansible.builtin.import_tasks: ./playbook/configure-application.yml
+      when: "'webserver' in group_names"
+
+    - name: Installer base de données
+      ansible.builtin.import_tasks: ./playbook/install-bdd.yml
+      when: "'dbsystems' in group_names"
+
+    - name: Configurer base de données sur le serveur d'application
+      ansible.builtin.import_tasks: ./playbook/configure-bdd.yml
+      when: "'webserver' in group_names"
+
+    - name: Importer le connecteur dans la base de données
+      ansible.builtin.import_tasks: ./playbook/import-connector-bdd.yml
+      when: "'dbsystems' in group_names"
+
+    - name: Connecter le serveur d'application à la base de données
+      ansible.builtin.import_tasks: ./playbook/connect-webserver-to-bdd.yml
+      when: "'webserver' in group_names"
+
+    - name: Ajouter extensions TOTP au serveurs web
+      ansible.builtin.import_tasks: ./playbook/add-totp-to-application.yml
+      when: "'webserver' in group_names"
+
+    - name: Redemarrer les services
+      ansible.builtin.import_tasks: ./playbook/redemarrage-des-services.yml

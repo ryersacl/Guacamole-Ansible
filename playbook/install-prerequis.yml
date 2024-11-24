@@ -1,0 +1,10 @@
+---
+- name: Chargement des variables
+  ansible.builtin.include_vars:
+    file: ../vars/vars_prerequis.yml
+
+- name: Installation du paquet "{{ item }}"
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ prerequis_package }}"

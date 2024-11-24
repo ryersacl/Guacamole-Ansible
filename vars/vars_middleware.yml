@@ -1,0 +1,6 @@
+middleware_name: tomcat9
+middleware_package:
+  - tomcat9
+  - tomcat9-admin
+  - tomcat9-common
+  - tomcat9-user

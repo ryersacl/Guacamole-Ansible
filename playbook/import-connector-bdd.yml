@@ -1,0 +1,42 @@
+---
+- name: Chargement des variables
+  ansible.builtin.include_vars:
+    file: ./vars_database.yml
+
+- name: Chargement des variables
+  ansible.builtin.include_vars:
+    file: ../vars/vars_application.yml
+
+- name: Créer le répertoire temporaire de configuration des extensions
+  file:
+    path: /tmp/{{ application_name }}
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Telecharger l'extension JDBC de {{ application_name }}
+  ansible.builtin.get_url:
+    url: https://downloads.apache.org/{{ application_name }}/{{ application_version }}/binary/{{ application_name }}-auth-jdbc-{{ application_version }}.tar.gz
+    dest: /tmp/{{ application_name }}-auth-jdbc-{{ application_version }}.tar.gz
+    mode: '0644'
+
+- name: Extraire l'archive de l'extension JDBC
+  ansible.builtin.unarchive:
+    src: /tmp/{{ application_name }}-auth-jdbc-{{ application_version }}.tar.gz
+    dest: /tmp/{{ application_name }}
+    remote_src: true
+
+- name: Télécharger le connecteur {{ database_engine }} avec curl
+  ansible.builtin.command: wget -O /tmp/{{ application_name }}/{{ database_engine }}-connector-java-{{ database_connector_version }}.tar.gz "{{ database_connector_url }}"
+
+- name: Extraire le connecteur {{ database_engine }}
+  ansible.builtin.unarchive:
+    src: /tmp/{{ application_name }}/{{ database_engine }}-connector-java-{{ database_connector_version }}.tar.gz
+    dest: /tmp/{{ application_name }}
+    remote_src: true
+
+- name: Importer tous les fichiers SQL de guacamole-auth-jdbc dans guacadb
+  ansible.builtin.shell:
+    cmd: "cat /tmp/{{ application_name }}/{{ application_name }}-auth-jdbc-1.5.5/mysql/schema/*.sql | mysql -u root guacadb"
+  ignore_errors: true

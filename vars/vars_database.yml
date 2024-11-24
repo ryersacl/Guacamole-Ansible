@@ -1,0 +1,18 @@
+---
+database_engine: mysql
+database_binaire: mysql
+database_server: mysql-server
+database_superuser: root
+database_old_root_password: oldrootpassword
+database_root_password: rootpassword
+database_application_db_name: guacadb
+database_application_db_user: guaca_nachos
+database_application_db_user_password: guaca_password
+database_prerequis:
+  - python3-full
+  - python3-pip
+  - python3-pymysql
+  - curl
+  - wget
+database_connector_version: 9.1.0
+database_connector_url: https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-j-9.1.0.tar.gz

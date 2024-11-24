@@ -1,0 +1,6 @@
+#Specific file
+.venv
+.vscode
+#Folder
+artifact/
+ansible-navigator.log

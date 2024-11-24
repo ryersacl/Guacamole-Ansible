@@ -1,0 +1,35 @@
+---
+- name: Chargement des variables
+  ansible.builtin.include_vars:
+    file: ../vars/vars_application.yml
+
+- name: Creer le dossier de configuration de "{{ application_name }}"
+  ansible.builtin.file:
+    path: /etc/{{ application_name }}
+    state: directory
+    mode: '0755'
+
+
+- name: Téléchargement du paquet
+  ansible.builtin.get_url:
+    url: https://downloads.apache.org/{{ application_name }}/{{ application_version }}/binary/{{ application_name }}-{{ application_version }}.war
+    dest: /etc/{{ application_name }}/{{ application_name }}.war
+    mode: '0644'
+
+- name: Créer le lien symbolique entre "{{ application_name }}" et "{{ middleware_name }}"
+  ansible.builtin.file:
+    src: /etc/{{ application_name }}/{{ application_name }}.war
+    dest: /var/lib/{{ middleware_name }}/webapps/{{ application_name }}.war
+    state: link
+
+- name: Redémarrer le service "{{ middleware_name }}"
+  ansible.builtin.systemd:
+    name: "{{ middleware_name }}"
+    state: restarted
+    enabled: true
+
+- name: Redémarrer le service "{{ application_name }}"
+  ansible.builtin.systemd:
+    name: "{{ application_binaire }}"
+    state: restarted
+    enabled: true

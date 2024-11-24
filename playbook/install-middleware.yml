@@ -1,0 +1,29 @@
+---
+- name: Chargement des variables
+  ansible.builtin.include_vars:
+    file: ../vars/vars_middleware.yml
+
+- name: Ajouter aux sources list le dépôt "{{ middleware_name }}"
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/{{ middleware_name }}.list
+    content: "deb http://fr.archive.ubuntu.com/ubuntu/ jammy-updates universe\n"
+    mode: '0644'
+    owner: root
+    group: root
+
+- name: Mettre à jour les sources APT
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Installer "{{ middleware_name }}" et ses dépendances
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: true
+  loop: "{{ middleware_package }}"
+
+- name: Activer et démarrer le service
+  ansible.builtin.systemd:
+    name: "{{ middleware_name }}"
+    enabled: true
+    state: started

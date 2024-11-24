@@ -1,0 +1,31 @@
+---
+prerequis_package:
+  - build-essential
+  - libcairo2-dev
+  - libjpeg-turbo8-dev
+  - libpng-dev
+  - libtool-bin
+  - uuid-dev
+  - libossp-uuid-dev
+  - libavcodec-dev
+  - libavformat-dev
+  - libavutil-dev
+  - libswscale-dev
+  - freerdp2-dev
+  - libpango1.0-dev
+  - libssh2-1-dev
+  - libvncserver-dev
+  - libtelnet-dev
+  - libwebsockets-dev
+  - libssl-dev
+  - libvorbis-dev
+  - libwebp-dev
+  - libpulse-dev
+  - unzip
+  - curl
+  - gzip
+  - bzip2
+  - unzip
+  - xz-utils
+  - zstd
+  - wget

@@ -1,0 +1,31 @@
+---
+- name: Chargement des variables
+  ansible.builtin.include_vars:
+    file: ./vars_database.yml
+
+- name: Chargement des variables
+  ansible.builtin.include_vars:
+    file: ../vars/vars_application.yml
+
+- name: Redemarrer {{ database_engine }} sur les serveurs de base de données
+  ansible.builtin.service:
+    name: "{{ database_engine }}"
+    state: restarted
+  when: "'dbsystems' in group_names"
+
+- name: Redemarrer {{ middleware_name }} sur les serveurs web
+  ansible.builtin.service:
+    name: "{{ middleware_name }}"
+    state: restarted
+  when: "'webserver' in group_names"
+
+- name: Redemarrer {{ application_binaire }} sur les serveurs web
+  ansible.builtin.service:
+    name: "{{ application_binaire }}"
+    state: restarted
+  when: "'webserver' in group_names"
+
+#- name: Nettoyer les fichiers temporaires
+#  ansible.builtin.file:
+#    path: /tmp/{{ application_name }}
+#    state: absent
